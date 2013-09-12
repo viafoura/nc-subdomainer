@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Subdomains!</h1>
+
+<form action="/subdomain" method="post" id="addForm">
+<table id="HolderTable">
+    <tr>
+        <th>Subdomain</th>
+        <th>Direction Type</th>
+        <th>Destination</th>
+        <th>Delete</th>
+    </tr>
+    <tr>
+        <td> viafoundry.com </td>
+        <td> to IP ('A record') </td>
+        <td> 0.0.0.0 </td>
+        <td> <button type="button" class="btn btn-danger">Delete</button> </td>
+    </tr>
+    <tr class="odd">
+        <td> viafoundry.com </td>
+        <td> to IP ('A record') </td>
+        <td> 0.0.0.0 </td>
+        <td> <button type="button" class="btn btn-danger">Delete</button> </td>
+    </tr>
+    <tr>
+        <td> <select name="domain" id="domain">
+                <option value="viafoundry.com">viafoundry.com</option>
+                <option value="viafourous.com">viafourous.com</option>
+                <option value="fiavoura.com">fiavoura.com</option>
+            </select> </td>
+        <td> <select name="type" id="type">
+                <option value="a">to IP ('A record')</option>
+                <option value="cname">to Host ('CNAME record')</option>
+                <option value="redirect">complete redirect ('301 redirect')</option>
+            </select> </td>
+        <td> <input type="text" name="dest" id="dest" placeholder="0.0.0.0"> </td>
+        <td> <button id="addButton" type="button" class="btn btn-primary">Add</button> </td>
+    </tr>
+</table>
+</form>
+{% endblock %}

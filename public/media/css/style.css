@@ -1,0 +1,20 @@
+@import "bootstrap.min.css";
+
+#Wrap{
+    width: 90%;
+    margin: 0 auto;
+}
+
+#HolderTable{
+    width: 100%;
+    border: solid 1px #444;
+}
+#HolderTable td{
+    width: 20%;
+    padding: 10px;
+    border-right: solid 1px #444;
+    border-left: solid 1px #44;
+}
+#HolderTable tr.odd{
+    background: #EEE;
+}

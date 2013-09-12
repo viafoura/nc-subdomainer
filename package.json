@@ -1,0 +1,31 @@
+{
+  "name": "nc-subdomainer",
+  "description": "Easy subdomain changes to domains hosted at Namecheap",
+  "version": "0.0.1",
+  "maintainers": [
+    {
+      "name": "Andrew Kish",
+      "email": "akish@kishcom.com",
+      "web": "http://kishcom.com"
+    }
+  ],
+  "dependencies": {
+    "express": "latest",
+    "hiredis": "latest",
+    "redis": "latest",
+    "namecheap": "latest",
+    "swig": "latest",
+    "validator": "latest",
+    "ams": "latest",
+    "connect-redis": "~1.4.5",
+    "async": "~0.2.9",
+    "passport": "~0.1.17",
+    "passport-github": "~0.1.5"
+  },
+  "licenses": [
+    {
+      "name": "MIT",
+      "url": ""
+    }
+  ]
+}

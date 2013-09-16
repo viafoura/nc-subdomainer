@@ -6,42 +6,41 @@
 /**  Depends  **/
 var express = require('express'),
     swig = require('swig'),
-    Namecheap = require('namecheap'),namecheap,
+    Namecheap = require('namecheap'),
     redis = require("redis"), client,
     async = require("async"),
+    settings = require("./settings").settings,
     passport = require("passport"), domain,
     GitHubStrategy = require("passport-github").Strategy,
     site = module.exports = express();
 var redisStore = require("connect-redis")(express);
 
-if (!process.env.NCSUBDOMAIN){
-    process.exit("Missing nc-subdomainer access domain name!")
+if (!settings.NCSUBDOMAIN){
+    process.exit("Missing nc-subdomainer access domain name!");
 }
-if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_ID){
-    process.exit("Missing Github creds!")
+if (!settings.GITHUB_CLIENT_ID || !settings.GITHUB_CLIENT_ID){
+    process.exit("Missing Github creds!");
 }
 
-var GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID,
-    GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+var GITHUB_CLIENT_ID = settings.GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET = settings.GITHUB_CLIENT_SECRET;
 
-var enabledDomains = ["viafoundry.com", "fiavoura.com", "viafourous.com"]; //, "fun-cooker.com", "cryptonectar.com"];
+var namecheap = new Namecheap(settings.NC_USER, settings.NC_APIKEY, settings.NC_ALLOWEDIP);
 
 //Dev mode
 site.configure('dev', function(){
     //Set your domain name for your development environment
-    domain = process.env.NCSUBDOMAIN || "localhost";
+    domain = settings.NCSUBDOMAIN || "localhost";
     site.set('domain', domain);
-    namecheap = new Namecheap('kishcom', 'GET_API_KEY', '141.117.10.153'); // 141.117.10.153 is fiavoura.com ... my local VM. IPs must be registered with namecheap
     client = redis.createClient();
     site.use(express.logger('dev'));
     console.log("Running in dev mode");
 });
 //Live deployed mode
 site.configure('live', function(){
-    domain = process.env.NCSUBDOMAIN || "localhost";
+    domain = settings.NCSUBDOMAIN || "localhost";
     //Set your live domain name here
     site.set('domain', 'viafoundry.com');
-    namecheap = new Namecheap('kishcom', 'GET_API_KEY', '141.117.10.40'); // 141.117.10.40 is hal.viafoura.com ... Jenkins/Hal-hubot/selenium live here too!
     client = redis.createClient();
 });
 
@@ -60,7 +59,7 @@ passport.use(new GitHubStrategy({
     callbackURL: "http://" + domain + ":8888/auth/github/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    client.get()
+    client.get();
     /*User.findOrCreate({ githubId: profile.id }, function (err, user) {
       return done(err, user);
     });*/
@@ -105,18 +104,16 @@ site.get('/subdomains', function(req, res, next){
     // Use async queue to do this
     var q = async.queue(function (domain, callback) {
         console.log('calling namecheap and asking about ' + domain.name);
-        recordsAssembly.push({"domain": domain.name, "records": [ {"www": "something"}, {"www4": "somethingelse"}, ]});
-        callback(false, "testing!");
-        // Uncomment when you get an api key
-        /*namecheap.domains.dns.getHosts(domain.name, function(err, res) {
-        console.log(res);
-        recordsAssembly.push(res);
-        if (err){
-            callback(true, err);
-        }else{
-            callback(false, res);
-        }
-        });*/
+        namecheap.domains.dns.getHosts(domain.name, function(err, res) {
+            if (err){
+                console.log(err);
+                callback(true, err);
+            }else{
+                console.log(err);
+                recordsAssembly.push(res);
+                callback(false, res);
+            }
+        });
         
     }, 4); // this number is concurrency, (how many HTTP threads to open at once)
     
@@ -125,16 +122,13 @@ site.get('/subdomains', function(req, res, next){
         console.log('all items have been processed, returning!');
         console.log("done in: " + ( new Date() - timer ) + "ms");
         res.json(recordsAssembly);
-    }
-
+    };
+    var enabledDomains = settings.ENABLED_DOMAINS;
     // Loop over our domains and get their records
     for (var domain in enabledDomains){
         q.push({"name": enabledDomains[domain]}, function (err, hostRecords) {
             if (err){
                 console.error(hostRecords);
-            }else{
-                console.log('Host records for ' + enabledDomains[domain] +' returned!');
-                console.log(JSON.stringify(hostRecords));
             }
         });
     }
@@ -161,6 +155,6 @@ site.all('*', function(req, resp, next){
 *
 */
 //Foreman will set the proper port for live mode, otherwise use port 8888
-var port = process.env.PORT || 8888;
+var port = settings.PORT || 8888;
 site.listen(port);
 console.log("Server listening to http://" + site.get('domain'));

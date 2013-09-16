@@ -11,7 +11,8 @@
         <th>Destination</th>
         <th>Delete</th>
     </tr>
-    <tr>
+    <tr id="loadingRow"> <td colspan="4" align="center"> Refreshing Domains from Namecheap <br /> <img src="/media/images/loading.gif" alt="Loading..." /> </td> </tr>
+    <!--<tr>
         <td> viafoundry.com </td>
         <td> to IP ('A record') </td>
         <td> 0.0.0.0 </td>
@@ -23,7 +24,13 @@
         <td> 0.0.0.0 </td>
         <td> <button type="button" class="btn btn-danger">Delete</button> </td>
     </tr>
-    <tr>
+    -->
+</table>
+</form>
+
+<div id="newRowHolder">
+    <table>
+        <tr>
         <td> <select name="domain" id="domain">
                 <option value="viafoundry.com">viafoundry.com</option>
                 <option value="viafourous.com">viafourous.com</option>
@@ -37,6 +44,6 @@
         <td> <input type="text" name="dest" id="dest" placeholder="0.0.0.0"> </td>
         <td> <button id="addButton" type="button" class="btn btn-primary">Add</button> </td>
     </tr>
-</table>
-</form>
+    </table>
+</div>
 {% endblock %}

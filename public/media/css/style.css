@@ -18,3 +18,7 @@
 #HolderTable tr.odd{
     background: #EEE;
 }
+
+#loadingRow, #newRowHolder{
+    display: none;
+}

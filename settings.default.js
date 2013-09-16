@@ -11,5 +11,5 @@ exports.settings = {
     GITHUB_ORG: "",
 
     // What domains in the namecheap account do you want to use with subdomains?
-    enabledDomains: ["viafoundry.com", "fiavoura.com", "viafourous.com"]
+    enabledDomains: ["example2.com", "example.org", "example.net"]
 };

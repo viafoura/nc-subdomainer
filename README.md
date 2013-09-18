@@ -7,7 +7,7 @@
 Namecheap subdomain record manager.
 
 ### What?
-This is a Node.js app for managing subdomain records for a given set of domains registered on Namecheap. Authentication through Github.
+This is a Node.js app for managing subdomain records for a given set of domains registered on Namecheap. Authentication through Github and is restricted to a given organization.
 
 ### Why?
 Maybe you've got a dev team and a project that requires everyone to have unique domains.
@@ -28,6 +28,7 @@ The rest of the settings can be set inside of "settings.js" which you'll have to
 
 ## Live Deploy
 
+    npm install
     sudo cp nc-subdomainer.upstart /etc/init/nc-subdomainer.conf
     # Change values here to match your setup
     sudo vim /etc/init/nc-subdomainer.conf

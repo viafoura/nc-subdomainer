@@ -198,15 +198,64 @@ site.post('/subdomain', function(req, res, next){
                             res.json({"error": true, "message": "Unexpected response."});
                         }
                     }
-                    
                 });
             });
     }
 });
 
-// Delete a subdomain!
-site.delete('/subdomain/:domain', function(req, res, next){
-    res.json({"error": "coming soon"});
+// Delete a subdomain! (What does "DRY" mean anyways?)
+site.delete('/subdomain', function(req, res, next){
+        var error = "";
+    var found = false;
+    for (var i in settings.ENABLED_DOMAINS){
+        if (settings.ENABLED_DOMAINS[i] === req.body.domain){
+            found = true;
+            break;
+        }
+    }
+    if (!found){
+        error = "Bad domain!";
+    }
+
+    if (error !== ""){
+        res.json({"error": error});
+    }else{
+        var domainHostRecords = [];
+        client.get(req.body.domain, function(err, reply) {
+                // reply is null when the key is missing
+                if (reply !== null){
+                    reply = JSON.parse(reply);
+                }
+                
+                var currentHostRecords = reply.DomainDNSGetHostsResult.host;
+                // Look over current hosts, if we find the subdomain we're going to remove, don't add it (obviously)
+                for (var record in currentHostRecords){
+                    if (record.Name !== req.body.subdomain){
+                        // Weird that Namecheap's API getter/setting names don't line up :\
+                        var updateThis = {  HostName: currentHostRecords[record].Name,
+                                            RecordType: currentHostRecords[record].Type,
+                                            Address: currentHostRecords[record].Address,
+                                            TTL: currentHostRecords[record].TTL };
+
+                        domainHostRecords.push(updateThis);
+                    }
+                }
+                //console.log(req.body.domain, domainHostRecords);
+                namecheap.domains.dns.setHosts(req.body.domain, domainHostRecords,
+                function(err, ncres) {
+                    if (err){
+                        res.json({"error": err});
+                    }else{
+                        console.log(ncres);
+                        if (ncres.DomainDNSSetHostsResult.IsSuccess === true){
+                            res.json({"error": false, "message": "Subdomain added!"});
+                        }else{
+                            res.json({"error": true, "message": "Unexpected response."});
+                        }
+                    }
+                });
+            });
+    }
 });
 
 //Catch all other attempted routes and throw them a 404!

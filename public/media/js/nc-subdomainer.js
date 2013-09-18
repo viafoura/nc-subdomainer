@@ -9,9 +9,26 @@ $(document).ready(function(){
             url: "/subdomain",
             data: $("#addForm").serialize(),
             success: function(res){
-                console.log(res);
+                alert(res.message);
+                reloadHosts();
             }
         });
+    });
+
+
+    // Delete a new subdomain
+    $(".deleteButton").click(function(evt){
+        console.log($(this).data("domain"));
+        console.log($(this).data("subdomain"));
+        /*$.ajax({
+            dataType: "json",
+            type: "delete",
+            url: "/subdomains",
+            data: $("#addForm").serialize(),
+            success: function(res){
+                console.log(res);
+            }
+        });*/
     });
 
     // Change placeholder on dropdown update
@@ -63,7 +80,7 @@ var reloadHosts = function(){
                         }
 
                         rowOutput = rowOutput + "<td>" + records.host[a].Address + "</td>";
-                        rowOutput = rowOutput + '<td><button type="button" class="btn btn-danger deleteButton">Delete</button></td>';
+                        rowOutput = rowOutput + '<td><button type="button" class="btn btn-danger deleteButton" data-domain="' + records.Domain + '" data-subdomain="' + records.host[a].Name + '">Delete</button></td>';
                         $("#HolderTable").append(rowOutput);
                     }
                 }

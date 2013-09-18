@@ -21,6 +21,7 @@ This project relies on environment variables and a single configuration file.
 Environment variables this app expects:
 
     NODE_ENV                - "live" or "dev"
+    PORT                    - port to run the app on
 
 The rest of the settings can be set inside of "settings.js" which you'll have to copy and set
 

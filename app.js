@@ -331,6 +331,6 @@ site.all('*', function(req, resp, next){
 *
 */
 //Foreman will set the proper port for live mode, otherwise use port 8888
-var port = settings.PORT || 8888;
+var port = process.env.PORT || 8888;
 site.listen(port);
 console.log("Server listening to http://" + site.get('domain') + " on port " + port);

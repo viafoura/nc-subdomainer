@@ -4,6 +4,7 @@ exports.settings = {
     NC_APIKEY: "", // Namecheap API key
     NC_USER: "", // Namecheap Username
     NC_ALLOWEDIP: "", // App's allowed IP address (must also be set in Namecheap control panel)
+    DNS_TTL: 600, // DNS TTL in seconds
 
     // Setup your github creds here
     GITHUB_CLIENT_ID: "",

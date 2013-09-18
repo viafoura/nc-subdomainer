@@ -59,7 +59,7 @@ passport.use(new GitHubStrategy({
     callbackURL: "http://" + domain + ":8888/auth/github/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    client.get();
+    //client.get();
     /*User.findOrCreate({ githubId: profile.id }, function (err, user) {
       return done(err, user);
     });*/
@@ -79,7 +79,7 @@ site.configure(function(){
 
     /** Middleware **/
     site.use(express.cookieParser());
-    site.use(express.session({secret: "totally salty man!!!!",
+    site.use(express.session({secret: "WHOA totally salty mang!?!!!!",
                               maxAge: new Date(Date.now() + 604800*1000),
                               store: new redisStore({ "client": client}) }));
     site.use(passport.initialize());
@@ -91,7 +91,7 @@ site.configure(function(){
 
 /**  Routes/Views  **/
 site.get('/', function(req, res, next){
-    res.render("index.html");
+    res.render("index.html", {"domain": settings.NCSUBDOMAIN, "enabledDomains": settings.ENABLED_DOMAINS});
 });
 
 // Get all the subdomains!
@@ -109,7 +109,9 @@ site.get('/subdomains', function(req, res, next){
                 console.log(err);
                 callback(true, err);
             }else{
-                console.log(err);
+                // Namecheap API is weird. You have to send/request all subdomains be updated when you just want to add one
+                // So we store the response of what records a domain has to send back to Namecheap when setting a domain
+                client.set(domain.name, JSON.stringify(res));
                 recordsAssembly.push(res);
                 callback(false, res);
             }
@@ -136,7 +138,70 @@ site.get('/subdomains', function(req, res, next){
 
 // Set a new subdomain!
 site.post('/subdomain', function(req, res, next){
-    res.json({"error": "coming soon"});
+    var error = "";
+    var found = false;
+    for (var i in settings.ENABLED_DOMAINS){
+        if (settings.ENABLED_DOMAINS[i] === req.body.domain){
+            found = true;
+            break;
+        }
+    }
+    if (!found){
+        error = "Bad domain!";
+    }
+    if (req.body.subdomaintype !== "CNAME" &&
+        req.body.subdomaintype !== "A" &&
+        req.body.subdomaintype !== "URL301" ){
+        error = "Bad direction type!";
+    }
+    if (!req.body.dest){
+        error = "Bad or missing destination.";
+    }
+
+    if (error !== ""){
+        res.json({"error": error});
+    }else{
+        var domainHostRecords = [{  HostName: req.body.subdomain,
+                                    RecordType: req.body.subdomaintype,
+                                    Address: req.body.dest,
+                                    TTL: settings.DNS_TTL }
+                                ];
+        client.get(req.body.domain, function(err, reply) {
+                // reply is null when the key is missing
+                if (reply !== null){
+                    reply = JSON.parse(reply);
+                }
+                
+                var currentHostRecords = reply.DomainDNSGetHostsResult.host;
+                // Look over current hosts, if we find the subdomain we're going to add, don't add it (it's already in domainHostRecords)
+                for (var record in currentHostRecords){
+                    if (record.Name !== req.body.subdomain){
+                        // Weird that Namecheap's API getter/setting names don't line up :\
+                        var updateThis = {  HostName: currentHostRecords[record].Name,
+                                            RecordType: currentHostRecords[record].Type,
+                                            Address: currentHostRecords[record].Address,
+                                            TTL: currentHostRecords[record].TTL };
+
+                        domainHostRecords.push(updateThis);
+                    }
+                }
+                //console.log(req.body.domain, domainHostRecords);
+                namecheap.domains.dns.setHosts(req.body.domain, domainHostRecords,
+                function(err, ncres) {
+                    if (err){
+                        res.json({"error": err});
+                    }else{
+                        console.log(ncres);
+                        if (ncres.DomainDNSSetHostsResult.IsSuccess === true){
+                            res.json({"error": false, "message": "Subdomain added!"});
+                        }else{
+                            res.json({"error": true, "message": "Unexpected response."});
+                        }
+                    }
+                    
+                });
+            });
+    }
 });
 
 // Delete a subdomain!

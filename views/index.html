@@ -4,9 +4,33 @@
 <h1>Subdomains!</h1>
 
 <form action="/subdomain" method="post" id="addForm">
+<table id="addSubdomainHolder">
+    <tr>
+        <th>Domain</th>
+        <th>Direction Type</th>
+        <th>Destination</th>
+        <th>Add</th>
+    </tr>
+    <tr>
+    <td> <input type="text" name="subdomain" id="subdomain" placeholder="subdomain"> . <select name="domain" id="domain">
+        {% for domain in enabledDomains %}
+            <option value="{{domain}}">{{domain}}</option>
+        {% endfor %}
+        </select> </td>
+    <td> <select name="subdomaintype" id="subdomaintype">
+            <option value="A">to IP ('A record')</option>
+            <option value="CNAME">to Host ('CNAME record')</option>
+            <option value="URL301">complete redirect ('301 redirect')</option>
+        </select> </td>
+    <td> <input type="text" name="dest" id="dest" placeholder="0.0.0.0"> </td>
+    <td> <button id="addButton" type="button" class="btn btn-primary">Add</button> </td>
+</tr>
+</table>
+</form>
+
 <table id="HolderTable">
     <tr>
-        <th>Subdomain</th>
+        <th>Domain</th>
         <th>Direction Type</th>
         <th>Destination</th>
         <th>Delete</th>
@@ -26,24 +50,5 @@
     </tr>
     -->
 </table>
-</form>
 
-<div id="newRowHolder">
-    <table>
-        <tr>
-        <td> <select name="domain" id="domain">
-                <option value="viafoundry.com">viafoundry.com</option>
-                <option value="viafourous.com">viafourous.com</option>
-                <option value="fiavoura.com">fiavoura.com</option>
-            </select> </td>
-        <td> <select name="type" id="type">
-                <option value="a">to IP ('A record')</option>
-                <option value="cname">to Host ('CNAME record')</option>
-                <option value="redirect">complete redirect ('301 redirect')</option>
-            </select> </td>
-        <td> <input type="text" name="dest" id="dest" placeholder="0.0.0.0"> </td>
-        <td> <button id="addButton" type="button" class="btn btn-primary">Add</button> </td>
-    </tr>
-    </table>
-</div>
 {% endblock %}

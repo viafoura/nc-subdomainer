@@ -9,9 +9,13 @@
     width: 100%;
     border: solid 1px #444;
 }
-#HolderTable td{
+
+td, th{
     width: 20%;
     padding: 10px;
+}
+
+#HolderTable td, #HolderTable th{
     border-right: solid 1px #444;
     border-left: solid 1px #44;
 }
@@ -21,4 +25,12 @@
 
 #loadingRow, #newRowHolder{
     display: none;
+}
+
+#addSubdomainHolder{
+    margin: 10px 0 0 0;
+    width: 100%;
+    border-top: solid 1px #444;
+    border-left: solid 1px #444;
+    border-right: solid 1px #444;
 }

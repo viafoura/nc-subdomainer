@@ -1,6 +1,7 @@
 $(document).ready(function(){
     reloadHosts();
 
+    // Add a new subdomain
     $("#addButton").click(function(evt){
         $.ajax({
             dataType: "json",
@@ -11,6 +12,23 @@ $(document).ready(function(){
                 console.log(res);
             }
         });
+    });
+
+    // Change placeholder on dropdown update
+    $("#subdomaintype").change(function(evt){
+        switch (evt.currentTarget.value){
+            case "CNAME":
+                $("#dest").attr("placeholder", "your_server.dyndns.org");
+            break;
+            case "A":
+                $("#dest").attr("placeholder", "0.0.0.0");
+            break;
+            case "URL301":
+                $("#dest").attr("placeholder", "http://redirect.example.com/");
+            break;
+            default:
+                return false;
+        }
     });
 });
 
@@ -50,10 +68,6 @@ var reloadHosts = function(){
                     }
                 }
             }
-
-            // Finally, add the new subdomain row
-            $("#HolderTable").append( $("#newRowHolder table").html() );
-
         }
     });
 };

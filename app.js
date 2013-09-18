@@ -12,6 +12,7 @@ var express = require('express'),
     settings = require("./settings").settings,
     passport = require("passport"), domain,
     GitHubStrategy = require("passport-github").Strategy,
+    request = require("request"),
     site = module.exports = express();
 var redisStore = require("connect-redis")(express);
 
@@ -46,10 +47,10 @@ site.configure('live', function(){
 
 // Passport
 passport.serializeUser(function(user, done) {
-  done(null, user);
+    done(null, user);
 });
 passport.deserializeUser(function(obj, done) {
-  done(null, obj);
+    done(null, obj);
 });
 
 // GITHUB
@@ -59,10 +60,47 @@ passport.use(new GitHubStrategy({
     callbackURL: "http://" + domain + ":8888/auth/github/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    //client.get();
-    /*User.findOrCreate({ githubId: profile.id }, function (err, user) {
-      return done(err, user);
-    });*/
+    var profileToken = "githubId" + profile.id;
+
+    // Get their orgs and make sure they belong to the right one!
+    //
+    request({ url: "https://api.github.com/users/"+profile.username+"/orgs" }, function(err, resp, body){
+        var orgs, found = false;
+        try{
+            orgs = JSON.parse(body);
+        }catch(e){
+            console.log("JSON parse error", e);
+        }
+        for (var i in orgs){
+            console.log(orgs[i]);
+            if (settings.GITHUB_ORG === orgs[i].login){
+                found = true;
+                break;
+            }
+        }
+        if (found){
+            console.log(profile.username + " is part of " + settings.GITHUB_ORG);
+            client.get(profileToken, function(err, reply){
+                if (err){
+                    console.log(err);
+                    return done(err, null);
+                }else{
+                    if (reply === null){
+                        // No user found, create them, store the whole profile
+                        client.set(profileToken, JSON.stringify( profile ));
+                        return done(false, profile);
+                    }else{
+                        return done(false, JSON.parse(reply));
+                    }
+                }
+            });
+        }else{
+
+            var message = profile.username + " is NOT a member of the '" + settings.GITHUB_ORG + "' organization. Make sure you are public: https://github.com/organizations/" + settings.GITHUB_ORG + "/publicize/" + profile.username + " .";
+            console.log(message);
+            return done(message, null);
+        }
+    });
   }
 ));
 
@@ -89,10 +127,34 @@ site.configure(function(){
     site.use(site.router);
 });
 
-/**  Routes/Views  **/
-site.get('/', function(req, res, next){
-    res.render("index.html", {"domain": settings.NCSUBDOMAIN, "enabledDomains": settings.ENABLED_DOMAINS});
+
+/** Routes/Views **/
+site.get('/', ensureAuthenticated, function(req, res, next){
+    res.render("index.html", {"domain": settings.NCSUBDOMAIN,
+                              "enabledDomains": settings.ENABLED_DOMAINS,
+                              "user": req.user});
 });
+
+
+
+// Github Auth
+site.get('/auth/github',
+        passport.authenticate('github'),
+        // The request will be redirected to GitHub for authentication, so this function will not be called.
+        function(req, res){ }
+);
+site.get('/auth/github/callback',
+        passport.authenticate('github', { failureRedirect: '/login' }),
+        function(req, res) { res.redirect('/'); }
+);
+site.get('/login', function(req, res){
+    res.render('login', { user: req.user, "githuborg": settings.GITHUB_ORG });
+});
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) { return next(); }
+    res.redirect('/login');
+}
+
 
 // Get all the subdomains!
 site.get('/subdomains', function(req, res, next){

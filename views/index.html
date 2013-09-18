@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Subdomains!</h1>
-
+<h1>{{ domain }} Subdomain Control!</h1>
+<img src="{{ user._json.avatar_url }}" alt=""><p>Welcome back <a href="{{ user.profileUrl }}" target="_BLANK">{{ user.username }}</a> ( {{ user.displayName }} )</p>
 <form action="/subdomain" method="post" id="addForm">
 <table id="addSubdomainHolder">
     <tr>
@@ -28,14 +28,17 @@
 </table>
 </form>
 
-<table id="HolderTable">
+<table id="HolderTable" class="tablesorter">
+    <thead>
     <tr>
         <th>Domain</th>
         <th>Direction Type</th>
         <th>Destination</th>
         <th>Delete</th>
     </tr>
-    <tr id="loadingRow"> <td colspan="4" align="center"> Refreshing Domains from Namecheap <br /> <img src="/media/images/loading.gif" alt="Loading..." /> </td> </tr>
+    </thead>
+    <tbody>
+    <tr id="loadingRow"> <td colspan="4" align="center"> Communicating with Namecheap <br /> <img src="/media/images/loading.gif" alt="Loading..." /> </td> </tr>
     <!--<tr>
         <td> viafoundry.com </td>
         <td> to IP ('A record') </td>
@@ -49,6 +52,7 @@
         <td> <button type="button" class="btn btn-danger">Delete</button> </td>
     </tr>
     -->
+    </tbody>
 </table>
 
 {% endblock %}

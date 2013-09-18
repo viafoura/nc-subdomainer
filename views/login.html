@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>You must be logged in to Github</h3>
+
+<p>You must be logged in and part of the "<b>{{ githuborg }}</b>" organization (publically).</p>
+
+<button type="button" class="btn btn-primary" onclick="javascript: window.location = '/auth/github'">Login to Github</button>
+{% endblock %}

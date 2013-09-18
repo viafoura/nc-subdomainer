@@ -13,7 +13,7 @@ This is a Node.js app for managing subdomain records for a given set of domains 
 Maybe you've got a dev team and a project that requires everyone to have unique domains.
 
 ### How?
-Designed to be launched into the Heroku free teir.
+You need Node.js and a redis server
 
 ## Dev Config
 This project relies on environment variables and a single configuration file.
@@ -27,3 +27,11 @@ The rest of the settings can be set inside of "settings.js" which you'll have to
     cp settings.default.js settings.js
 
 ## Live Deploy
+
+    sudo cp nc-subdomainer.upstart /etc/init/nc-subdomainer.conf
+    # Change values here to match your setup
+    sudo vim /etc/init/nc-subdomainer.conf
+    # Start it!
+    sudo service nc-subdomainer start
+    # Make sure all is well:
+    cat /var/log/nc-subdomainer.log

@@ -6,7 +6,7 @@
 /**  Depends  **/
 var express = require('express'),
     swig = require('swig'),
-    Namecheap = require('namecheap'),
+    Namecheap = require('./namecheap'),
     redis = require("redis"), client,
     async = require("async"),
     settings = require("./settings").settings,
@@ -175,7 +175,7 @@ site.post('/subdomain', function(req, res, next){
                 var currentHostRecords = reply.DomainDNSGetHostsResult.host;
                 // Look over current hosts, if we find the subdomain we're going to add, don't add it (it's already in domainHostRecords)
                 for (var record in currentHostRecords){
-                    if (record.Name !== req.body.subdomain){
+                    if (currentHostRecords[record].Name !== req.body.subdomain){
                         // Weird that Namecheap's API getter/setting names don't line up :\
                         var updateThis = {  HostName: currentHostRecords[record].Name,
                                             RecordType: currentHostRecords[record].Type,
@@ -189,6 +189,7 @@ site.post('/subdomain', function(req, res, next){
                 namecheap.domains.dns.setHosts(req.body.domain, domainHostRecords,
                 function(err, ncres) {
                     if (err){
+                        console.log(err);
                         res.json({"error": err});
                     }else{
                         console.log(ncres);
@@ -205,7 +206,7 @@ site.post('/subdomain', function(req, res, next){
 
 // Delete a subdomain! (What does "DRY" mean anyways?)
 site.delete('/subdomain', function(req, res, next){
-        var error = "";
+    var error = "";
     var found = false;
     for (var i in settings.ENABLED_DOMAINS){
         if (settings.ENABLED_DOMAINS[i] === req.body.domain){
@@ -230,7 +231,7 @@ site.delete('/subdomain', function(req, res, next){
                 var currentHostRecords = reply.DomainDNSGetHostsResult.host;
                 // Look over current hosts, if we find the subdomain we're going to remove, don't add it (obviously)
                 for (var record in currentHostRecords){
-                    if (record.Name !== req.body.subdomain){
+                    if (currentHostRecords[record].Name !== req.body.subdomain){
                         // Weird that Namecheap's API getter/setting names don't line up :\
                         var updateThis = {  HostName: currentHostRecords[record].Name,
                                             RecordType: currentHostRecords[record].Type,
@@ -240,15 +241,14 @@ site.delete('/subdomain', function(req, res, next){
                         domainHostRecords.push(updateThis);
                     }
                 }
-                //console.log(req.body.domain, domainHostRecords);
+
                 namecheap.domains.dns.setHosts(req.body.domain, domainHostRecords,
                 function(err, ncres) {
                     if (err){
                         res.json({"error": err});
                     }else{
-                        console.log(ncres);
                         if (ncres.DomainDNSSetHostsResult.IsSuccess === true){
-                            res.json({"error": false, "message": "Subdomain added!"});
+                            res.json({"error": false, "message": "Subdomain removed!"});
                         }else{
                             res.json({"error": true, "message": "Unexpected response."});
                         }

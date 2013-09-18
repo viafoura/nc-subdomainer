@@ -1,7 +1,7 @@
 {
   "name": "nc-subdomainer",
   "description": "Easy subdomain changes to domains hosted at Namecheap",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "maintainers": [
     {
       "name": "Andrew Kish",
@@ -13,14 +13,15 @@
     "express": "latest",
     "hiredis": "latest",
     "redis": "latest",
-    "namecheap": "latest",
     "swig": "latest",
     "validator": "latest",
     "ams": "latest",
-    "connect-redis": "~1.4.5",
-    "async": "~0.2.9",
-    "passport": "~0.1.17",
-    "passport-github": "~0.1.5"
+    "connect-redis": "latest",
+    "async": "latest",
+    "request": "latest",
+    "xml2json": "latest",
+    "passport": "latest",
+    "passport-github": "latest"
   },
   "licenses": [
     {

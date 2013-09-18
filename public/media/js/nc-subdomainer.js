@@ -15,22 +15,6 @@ $(document).ready(function(){
         });
     });
 
-
-    // Delete a new subdomain
-    $(".deleteButton").click(function(evt){
-        console.log($(this).data("domain"));
-        console.log($(this).data("subdomain"));
-        /*$.ajax({
-            dataType: "json",
-            type: "delete",
-            url: "/subdomains",
-            data: $("#addForm").serialize(),
-            success: function(res){
-                console.log(res);
-            }
-        });*/
-    });
-
     // Change placeholder on dropdown update
     $("#subdomaintype").change(function(evt){
         switch (evt.currentTarget.value){
@@ -51,6 +35,7 @@ $(document).ready(function(){
 
 var reloadHosts = function(){
     $("#loadingRow").show();
+    $(".generatedRow").remove();
     $.ajax({
         dataType: "json",
         url: "/subdomains",
@@ -64,9 +49,9 @@ var reloadHosts = function(){
                 var records = res[i].DomainDNSGetHostsResult;
                 for (var a = 0, hostLen = records.host.length; hostLen > a; a++){
                     if (records.host[a].Name !== "@" && records.host[a].Name !== "www"){
-                        var rowOutput = "<tr data-hostid='" + records.HostId + "' data-owner=''><td><b>"+ records.host[a].Name +"</b>." + records.Domain + "</td>";
+                        var rowOutput = "<tr class='generatedRow' data-hostid='" + records.HostId + "' data-owner=''><td><b>"+ records.host[a].Name +"</b>." + records.Domain + "</td>";
                         switch ( records.host[a].Type ){
-                            case "URL":
+                            case "CNAME":
                                 rowOutput = rowOutput + "<td data-recordtype> to host ('CNAME' record)</td>";
                             break;
                             case "URL301":
@@ -85,6 +70,20 @@ var reloadHosts = function(){
                     }
                 }
             }
+
+            // Delete a new subdomain
+            $(".deleteButton").click(function(evt){
+                var data = "subdomain=" + $(this).data("subdomain") + "&domain=" + $(this).data("domain");
+                $.ajax({
+                    dataType: "json",
+                    type: "delete",
+                    url: "/subdomain",
+                    "data": data,
+                    success: function(res){
+                        console.log(res);
+                    }
+                });
+            });
         }
     });
 };
